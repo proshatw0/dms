@@ -824,7 +824,7 @@ func main() {
 		for i := 0; i < len(arr); i++ {
 			commands[i] = arr[i]
 		}
-		Processing_Request("data/"+*filepath, commands)
+		Processing_Request("../data/"+*filepath, commands)
 	} else {
 		fmt.Println("-->invalid request")
 		fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
