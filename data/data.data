@@ -5,7 +5,7 @@ hash_table: [{classmates, 12}, {control, 13}]
 
 cars: [bmw, toyota, honda, sobaru, mersedes]
 bicycles: [stels, bmx, lada, priora, vesta, sport]
-keys: [a1, a2, a3, a4, a8, k5]
+keys: [a1, a2, a3, a4, a8, k5, k8]
 очередь: [Иван, Гриша, Оля, Петя]
 fruits: [3, {апельсин, яблоко, лимон, груша, банан, мандарин}]
 vegetables: [2, {картофель, лук, свекла, помидор, огурец}]

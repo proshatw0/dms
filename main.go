@@ -13,72 +13,6 @@ import (
 	"dms/src/structs"
 )
 
-// Stack/Queue
-type Node struct {
-	data string
-	next *Node
-}
-
-type Stack struct {
-	head *Node
-}
-
-type Queue struct {
-	head *Node
-	tail *Node
-}
-
-// Stack
-func (stack *Stack) spush(val string) error {
-	if val == "" {
-		return errors.New("-->unknown command")
-	}
-	node := &Node{data: val}
-	if stack.head == nil {
-		stack.head = node
-	} else {
-		node.next = stack.head
-		stack.head = node
-	}
-	return nil
-}
-
-func (stack *Stack) spop() (string, error) {
-	if stack.head == nil {
-		return "", errors.New("--> stack is empty")
-	} else {
-		val := stack.head.data
-		stack.head = stack.head.next
-		return val, nil
-	}
-}
-
-// Queue
-func (queue *Queue) qpush(val string) error {
-	if val == "" {
-		return errors.New("-->unknown command")
-	}
-	node := &Node{data: val}
-	if queue.head == nil {
-		queue.head = node
-		queue.tail = node
-	} else {
-		queue.tail.next = node
-		queue.tail = node
-	}
-	return nil
-}
-
-func (queue *Queue) qpop() (string, error) {
-	if queue.head == nil {
-		return "", errors.New("--> queue is empty")
-	} else {
-		val := queue.head.data
-		queue.head = queue.head.next
-		return val, nil
-	}
-}
-
 // file
 func Read_Line_Fromfile(path string, line_num int) (string, error) {
 	file, err := os.Open(path)
@@ -233,33 +167,33 @@ func Scan_Table_Set(filepath string, line_number int) structs.Set {
 	return set
 }
 
-func Scan_Table_Stack(filepath string, line_number int) Stack {
+func Scan_Table_Stack(filepath string, line_number int) structs.Stack {
 	line, err := Read_Line_Fromfile(filepath, line_number)
 	if err != nil {
-		return Stack{}
+		return structs.Stack{}
 	}
 	startIndex := strings.Index(line, "[") + 1
 	endIndex := strings.Index(line, "]")
 	val := line[startIndex:endIndex]
 	arr := strings.Split(val, ",")
-	stack := Stack{}
+	stack := structs.Stack{}
 	for i := len(arr) - 1; i >= 0; i-- {
-		stack.spush(strings.ReplaceAll(arr[i], " ", ""))
+		stack.Spush(strings.ReplaceAll(arr[i], " ", ""))
 	}
 	return stack
 }
-func Scan_Table_Queue(filepath string, line_number int) Queue {
+func Scan_Table_Queue(filepath string, line_number int) structs.Queue {
 	line, err := Read_Line_Fromfile(filepath, line_number)
 	if err != nil {
-		return Queue{}
+		return structs.Queue{}
 	}
 	startIndex := strings.Index(line, "[") + 1
 	endIndex := strings.Index(line, "]")
 	val := line[startIndex:endIndex]
 	arr := strings.Split(val, ",")
-	queue := Queue{}
+	queue := structs.Queue{}
 	for i := 0; i < len(arr); i++ {
-		queue.qpush(strings.ReplaceAll(arr[i], " ", ""))
+		queue.Qpush(strings.ReplaceAll(arr[i], " ", ""))
 	}
 	return queue
 }
@@ -312,13 +246,13 @@ func Print_Table_Set(filepath string, line_number int, name_table string, set st
 	return nil
 }
 
-func Print_Table_Stack(filepath string, line_number int, name_table string, stack Stack) error {
+func Print_Table_Stack(filepath string, line_number int, name_table string, stack structs.Stack) error {
 	out := name_table
 	out += ": ["
-	currentNode := stack.head
+	currentNode := stack.Head
 	for currentNode != nil {
-		out += currentNode.data + ", "
-		currentNode = currentNode.next
+		out += currentNode.Data + ", "
+		currentNode = currentNode.Next
 	}
 	if len(out) == len(name_table)+3 {
 		out = out + "]"
@@ -332,15 +266,15 @@ func Print_Table_Stack(filepath string, line_number int, name_table string, stac
 	return nil
 }
 
-func Print_Table_Queue(filepath string, line_number int, name_table string, queue Queue) error {
+func Print_Table_Queue(filepath string, line_number int, name_table string, queue structs.Queue) error {
 	out := name_table
 	out += ": ["
-	currentNode := queue.head
+	currentNode := queue.Head
 	for currentNode != nil {
-		if currentNode.data != "" {
-			out += currentNode.data + ", "
+		if currentNode.Data != "" {
+			out += currentNode.Data + ", "
 		}
-		currentNode = currentNode.next
+		currentNode = currentNode.Next
 	}
 	if len(out) == len(name_table)+3 {
 		out = out + "]"
@@ -434,7 +368,7 @@ func Processing_Request(filepath string, commands [4]string) {
 			stack := Scan_Table_Stack(filepath, number_line)
 			switch commands[0] {
 			case "spush":
-				err := stack.spush(commands[2])
+				err := stack.Spush(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -447,7 +381,7 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2])
 				return
 			case "spop":
-				value, err := stack.spop()
+				value, err := stack.Spop()
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -464,7 +398,7 @@ func Processing_Request(filepath string, commands [4]string) {
 			queue := Scan_Table_Queue(filepath, number_line)
 			switch commands[0] {
 			case "qpush":
-				err := queue.qpush(commands[2])
+				err := queue.Qpush(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -477,7 +411,7 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2])
 				return
 			case "qpop":
-				value, err := queue.qpop()
+				value, err := queue.Qpop()
 				if err != nil {
 					fmt.Println(err)
 					return
