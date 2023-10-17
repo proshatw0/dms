@@ -9,25 +9,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"dsm/src/structs"
 )
-
-// Set
-type Set struct {
-	Table []*Doubly_Connected_Set
-	Size  int
-}
-
-type Node_Set struct {
-	data     string
-	next     *Node_Set
-	previous *Node_Set
-}
-
-type Doubly_Connected_Set struct {
-	lenght int
-	head   *Node_Set
-	tail   *Node_Set
-}
 
 // Hash_Table
 type Hash_Table struct {
@@ -65,112 +49,6 @@ type Stack struct {
 type Queue struct {
 	head *Node
 	tail *Node
-}
-
-// Set
-func NewSet(size int) Set {
-	set := make([]*Doubly_Connected_Set, size)
-	for i := range set {
-		set[i] = &Doubly_Connected_Set{}
-	}
-	return Set{
-		Table: set,
-		Size:  size,
-	}
-}
-
-func (ht *Set) Hash_Set(key string) int {
-	key_int := 0
-	for _, symbol := range key {
-		key_int += int(symbol)
-	}
-	return key_int % ht.Size
-}
-
-func (ht *Set) sadd(key string) error {
-	hash := ht.Hash_Set(key)
-	if ht.Table[hash].lenght < 20 {
-		return ht.Table[hash].dspush(key)
-	} else {
-		oldSize := ht.Size
-		newHT := NewSet(oldSize * 2)
-		for i := 0; i < oldSize; i++ {
-			currentNode := ht.Table[i].head
-			for currentNode != nil {
-				new_hash := newHT.Hash_Set(currentNode.data)
-				newHT.Table[new_hash].dspush(currentNode.data)
-				currentNode = currentNode.next
-			}
-		}
-		*ht = newHT
-		new_hash := ht.Hash_Set(key)
-		return ht.Table[new_hash].dspush(key)
-	}
-}
-
-func (ht *Set) srem(key string) error {
-	hash := ht.Hash_Set(key)
-	return ht.Table[hash].dsdel(key)
-}
-
-func (ht *Set) sismember(key string) error {
-	hash := ht.Hash_Set(key)
-	currentNode := ht.Table[hash].head
-	for currentNode != nil {
-		if currentNode.data == key {
-			return nil
-		}
-		currentNode = currentNode.next
-	}
-	return errors.New("--> False")
-}
-
-func (doubly_connected *Doubly_Connected_Set) dspush(val string) error {
-	node_list := &Node_Set{data: val}
-	if doubly_connected.head == nil {
-		doubly_connected.head = node_list
-		doubly_connected.tail = node_list
-	} else {
-		currentNode := doubly_connected.head
-		for currentNode != nil {
-			if currentNode.data == val {
-				return errors.New("--> key already exists")
-			}
-			currentNode = currentNode.next
-		}
-		doubly_connected.tail.next = node_list
-		node_list.previous = doubly_connected.tail
-		doubly_connected.tail = node_list
-	}
-	doubly_connected.lenght++
-	return nil
-}
-
-func (doubly_connected *Doubly_Connected_Set) dsdel(val string) error {
-	currentNode := doubly_connected.head
-	for currentNode != nil {
-		if currentNode.data == val {
-			if currentNode == doubly_connected.head {
-				doubly_connected.head = currentNode.next
-				if doubly_connected.head != nil {
-					doubly_connected.head.previous = nil
-				}
-			} else if currentNode == doubly_connected.tail {
-				doubly_connected.tail = currentNode.previous
-				if doubly_connected.tail != nil {
-					doubly_connected.tail.next = nil
-				}
-			} else {
-				currentNode.previous.next = currentNode.next
-				currentNode.next.previous = currentNode.previous
-			}
-			doubly_connected.lenght--
-			return nil
-		}
-
-		currentNode = currentNode.next
-	}
-	return errors.New("--> key not founde")
 }
 
 // Hash_Table
@@ -475,10 +353,10 @@ func Search_Table(filepath string, command string, name_table string) (string, i
 	}
 }
 
-func Scan_Table_Set(filepath string, line_number int) Set {
+func Scan_Table_Set(filepath string, line_number int) structs.Set {
 	line, err := Read_Line_Fromfile(filepath, line_number)
 	if err != nil {
-		return Set{}
+		return structs.Set{}
 	}
 	startIndex := strings.Index(line, "[") + 1
 	endIndex := strings.Index(line, "}")
@@ -487,9 +365,9 @@ func Scan_Table_Set(filepath string, line_number int) Set {
 	val := line[sizeIndex+len(size)+2 : endIndex]
 	arr := strings.Split(val, ",")
 	size_int, _ := strconv.Atoi(size)
-	set := NewSet(size_int)
+	set := structs.NewSet(size_int)
 	for i := 0; i < len(arr); i++ {
-		set.sadd(strings.ReplaceAll(arr[i], " ", ""))
+		set.Sadd(strings.ReplaceAll(arr[i], " ", ""))
 	}
 	return set
 }
@@ -551,14 +429,14 @@ func Scan_Table_Hash_Table(filepath string, line_number int) Hash_Table {
 	return hash_table
 }
 
-func Print_Table_Set(filepath string, line_number int, name_table string, set Set) error {
+func Print_Table_Set(filepath string, line_number int, name_table string, set structs.Set) error {
 	out := name_table
 	out += ": [" + strconv.Itoa(set.Size) + ", {"
 	for index := 0; index < set.Size; index++ {
-		currentNode := set.Table[index].head
+		currentNode := set.Table[index].Head
 		for currentNode != nil {
-			out += currentNode.data + ", "
-			currentNode = currentNode.next
+			out += currentNode.Data + ", "
+			currentNode = currentNode.Next
 		}
 	}
 	if len(out) == len(name_table)+len(strconv.Itoa(set.Size))+6 {
@@ -658,7 +536,7 @@ func Processing_Request(filepath string, commands [4]string) {
 					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
 					return
 				}
-				err := set.sadd(commands[2])
+				err := set.Sadd(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -671,7 +549,7 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2])
 				return
 			case "srem":
-				err := set.srem(commands[2])
+				err := set.Srem(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -684,7 +562,7 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2])
 				return
 			case "sismember":
-				err := set.sismember(commands[2])
+				err := set.Sismember(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
