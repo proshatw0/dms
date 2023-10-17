@@ -1,10 +1,30 @@
 package workfile
 
 import (
-	"dms/src/structs"
 	"strconv"
 	"strings"
+
+	"dms/src/structs"
 )
+
+func Scan_Table_Array(filepath string, line_number int) structs.Array {
+	line, err := Read_Line_Fromfile(filepath, line_number)
+	if err != nil {
+		return structs.Array{}
+	}
+	startIndex := strings.Index(line, "[") + 1
+	endIndex := strings.Index(line, "}")
+	sizeIndex := strings.Index(line, ",")
+	size := line[startIndex:sizeIndex]
+	val := line[sizeIndex+len(size)+1 : endIndex]
+	arr := strings.Split(val, ",")
+	size_int, _ := strconv.Atoi(size)
+	Array := structs.NewArray(size_int)
+	for i := 0; i < len(arr); i++ {
+		Array.Aset(i, strings.ReplaceAll(arr[i], " ", ""))
+	}
+	return *Array
+}
 
 func Scan_Table_Set(filepath string, line_number int) structs.Set {
 	line, err := Read_Line_Fromfile(filepath, line_number)
@@ -22,7 +42,7 @@ func Scan_Table_Set(filepath string, line_number int) structs.Set {
 	for i := 0; i < len(arr); i++ {
 		set.Sadd(strings.ReplaceAll(arr[i], " ", ""))
 	}
-	return set
+	return *set
 }
 
 func Scan_Table_Stack(filepath string, line_number int) structs.Stack {
@@ -79,5 +99,5 @@ func Scan_Table_Hash_Table(filepath string, line_number int) structs.Hash_Table 
 			hash_table.Hset(key, value)
 		}
 	}
-	return hash_table
+	return *hash_table
 }
