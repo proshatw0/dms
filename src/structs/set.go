@@ -21,12 +21,12 @@ type Doubly_Connected_Set struct {
 }
 
 // Set
-func NewSet(size int) Set {
+func NewSet(size int) *Set {
 	set := make([]*Doubly_Connected_Set, size)
 	for i := range set {
 		set[i] = &Doubly_Connected_Set{}
 	}
-	return Set{
+	return &Set{
 		Table: set,
 		Size:  size,
 	}
@@ -40,24 +40,24 @@ func (ht *Set) Hash_Set(key string) int {
 	return key_int % ht.Size
 }
 
-func (ht *Set) Sadd(key string) error {
-	hash := ht.Hash_Set(key)
-	if ht.Table[hash].Lenght < 20 {
-		return ht.Table[hash].dspush(key)
+func (set *Set) Sadd(key string) error {
+	hash := set.Hash_Set(key)
+	if set.Table[hash].Lenght < 20 {
+		return set.Table[hash].dspush(key)
 	} else {
-		oldSize := ht.Size
+		oldSize := set.Size
 		newHT := NewSet(oldSize * 2)
 		for i := 0; i < oldSize; i++ {
-			currentNode := ht.Table[i].Head
+			currentNode := set.Table[i].Head
 			for currentNode != nil {
 				new_hash := newHT.Hash_Set(currentNode.Data)
 				newHT.Table[new_hash].dspush(currentNode.Data)
 				currentNode = currentNode.Next
 			}
 		}
-		*ht = newHT
-		new_hash := ht.Hash_Set(key)
-		return ht.Table[new_hash].dspush(key)
+		*set = *newHT
+		new_hash := set.Hash_Set(key)
+		return set.Table[new_hash].dspush(key)
 	}
 }
 

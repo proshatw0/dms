@@ -100,8 +100,18 @@ func Search_Number_Table(line string, name_table string) int {
 
 func Search_Table(filepath string, command string, name_table string) (string, int) {
 	switch command {
-	case "sadd", "srem", "sismember":
+	case "aset", "aget":
 		line, err := Read_Line_Fromfile(filepath, 1)
+		if err != nil {
+			log.Fatal(err)
+		}
+		number_line := Search_Number_Table(line, name_table)
+		if number_line == 0 {
+			return "array", 0
+		}
+		return "array", number_line
+	case "sadd", "srem", "sismember":
+		line, err := Read_Line_Fromfile(filepath, 2)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -111,7 +121,7 @@ func Search_Table(filepath string, command string, name_table string) (string, i
 		}
 		return "set", number_line
 	case "spush", "spop":
-		line, err := Read_Line_Fromfile(filepath, 2)
+		line, err := Read_Line_Fromfile(filepath, 3)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -121,7 +131,7 @@ func Search_Table(filepath string, command string, name_table string) (string, i
 		}
 		return "stack", number_line
 	case "qpush", "qpop":
-		line, err := Read_Line_Fromfile(filepath, 3)
+		line, err := Read_Line_Fromfile(filepath, 4)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -131,7 +141,7 @@ func Search_Table(filepath string, command string, name_table string) (string, i
 		}
 		return "queue", number_line
 	case "hset", "hdel", "hget":
-		line, err := Read_Line_Fromfile(filepath, 4)
+		line, err := Read_Line_Fromfile(filepath, 5)
 		if err != nil {
 			log.Fatal(err)
 		}

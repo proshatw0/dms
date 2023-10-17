@@ -24,12 +24,12 @@ type Doubly_Connected_Table struct {
 	Tail   *Node_Table
 }
 
-func NewHashTable(size int) Hash_Table {
+func NewHashTable(size int) *Hash_Table {
 	table := make([]*Doubly_Connected_Table, size)
 	for i := range table {
 		table[i] = &Doubly_Connected_Table{}
 	}
-	return Hash_Table{
+	return &Hash_Table{
 		Table: table,
 		Size:  size,
 	}
@@ -59,7 +59,7 @@ func (ht *Hash_Table) Hset(key string, value string) error {
 				currentNode = currentNode.Next
 			}
 		}
-		*ht = newHT
+		*ht = *newHT
 		new_hash := ht.Hash(val.Key)
 		return ht.Table[new_hash].dpush(*val)
 	}

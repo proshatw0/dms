@@ -1,9 +1,31 @@
 package workfile
 
 import (
-	"dms/src/structs"
 	"strconv"
+
+	"dms/src/structs"
 )
+
+func Print_Table_Array(filepath string, line_number int, name_table string, array structs.Array) error {
+	out := name_table
+	out += ": [" + strconv.Itoa(array.Lenght) + ", {"
+	if array.Data[0] == "" {
+		out += " "
+	}
+	for index := 0; index < array.Lenght; index++ {
+		out += array.Data[index] + ", "
+	}
+	if len(out) == len(name_table)+len(strconv.Itoa(array.Lenght))+6 {
+		out += "}]"
+	} else {
+		out = out[0:len(out)-2] + "}]"
+	}
+	err := WriteLineFromFile(filepath, line_number, out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func Print_Table_Set(filepath string, line_number int, name_table string, set structs.Set) error {
 	out := name_table

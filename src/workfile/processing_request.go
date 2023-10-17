@@ -1,5 +1,9 @@
 package workfile
-import "fmt"
+
+import (
+	"fmt"
+	"strconv"
+)
 
 func Processing_Request(filepath string, commands [4]string) {
 	mod, number_line := Search_Table(filepath, commands[0], commands[1])
@@ -9,6 +13,37 @@ func Processing_Request(filepath string, commands [4]string) {
 	}
 	if number_line != 0 {
 		switch mod {
+		case "array":
+			index, err := strconv.Atoi(commands[2])
+			if err != nil {
+				fmt.Println("-->invalid request")
+				fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+				return
+			}
+			array := Scan_Table_Array(filepath, number_line)
+			if array.Lenght <= 0 {
+				fmt.Println("-->table not found")
+				return
+			}
+			switch commands[0] {
+			case "aset":
+				if commands[3] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				err = array.Aset(index, commands[3])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Array(filepath, number_line, commands[1], array)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2], "~", commands[3])
+			}
 		case "set":
 			set := Scan_Table_Set(filepath, number_line)
 			if set.Size <= 0 {
