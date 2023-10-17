@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"dsm/src/structs"
+	"dms/src/structs"
 )
 
 // Hash_Table
