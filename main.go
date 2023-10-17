@@ -13,29 +13,6 @@ import (
 	"dms/src/structs"
 )
 
-// Hash_Table
-type Hash_Table struct {
-	Table []*Doubly_Connected_Table
-	Size  int
-}
-
-type Pair struct {
-	key   string
-	value string
-}
-
-type Node_Table struct {
-	data     Pair
-	next     *Node_Table
-	previous *Node_Table
-}
-
-type Doubly_Connected_Table struct {
-	lenght int
-	head   *Node_Table
-	tail   *Node_Table
-}
-
 // Stack/Queue
 type Node struct {
 	data string
@@ -49,122 +26,6 @@ type Stack struct {
 type Queue struct {
 	head *Node
 	tail *Node
-}
-
-// Hash_Table
-func NewHashTable(size int) Hash_Table {
-	table := make([]*Doubly_Connected_Table, size)
-	for i := range table {
-		table[i] = &Doubly_Connected_Table{}
-	}
-	return Hash_Table{
-		Table: table,
-		Size:  size,
-	}
-}
-
-func (ht *Hash_Table) hash(key string) int {
-	key_int := 0
-	for _, symbol := range key {
-		key_int += int(symbol)
-	}
-	return key_int % ht.Size
-}
-
-func (ht *Hash_Table) hset(key string, value string) error {
-	val := &Pair{key: key, value: value}
-	hash := ht.hash(val.key)
-	if ht.Table[hash].lenght < 20 {
-		return ht.Table[hash].dpush(*val)
-	} else {
-		oldSize := ht.Size
-		newHT := NewHashTable(oldSize * 2)
-		for i := 0; i < oldSize; i++ {
-			currentNode := ht.Table[i].head
-			for currentNode != nil {
-				new_hash := newHT.hash(currentNode.data.key)
-				newHT.Table[new_hash].dpush(currentNode.data)
-				currentNode = currentNode.next
-			}
-		}
-		*ht = newHT
-		new_hash := ht.hash(val.key)
-		return ht.Table[new_hash].dpush(*val)
-	}
-}
-
-func (ht *Hash_Table) hdel(key string) (string, error) {
-	hash := ht.hash(key)
-	pair, err := ht.Table[hash].ddel(key)
-	return pair.value, err
-}
-
-func (ht *Hash_Table) hget(key string) (string, error) {
-	hash := ht.hash(key)
-	currentNode := ht.Table[hash].head
-	for currentNode != nil {
-		if currentNode.data.key == key {
-			return currentNode.data.value, nil
-		}
-		currentNode = currentNode.next
-	}
-	return "", errors.New("-->element not found")
-}
-
-func (pair *Pair) ppush(key string, value string) {
-	pair.key = key
-	pair.value = value
-}
-
-func (doubly_connected *Doubly_Connected_Table) dpush(val Pair) error {
-	node_hesh := &Node_Table{data: val}
-	if doubly_connected.head == nil {
-		doubly_connected.head = node_hesh
-		doubly_connected.tail = node_hesh
-	} else {
-		currentNode := doubly_connected.head
-		for currentNode != nil {
-			if currentNode.data.key == val.key {
-				return errors.New("--> key already exists")
-			}
-			currentNode = currentNode.next
-		}
-		doubly_connected.tail.next = node_hesh
-		node_hesh.previous = doubly_connected.tail
-		doubly_connected.tail = node_hesh
-	}
-	doubly_connected.lenght++
-	return nil
-}
-
-func (doubly_connected *Doubly_Connected_Table) ddel(val string) (Pair, error) {
-	currentNode := doubly_connected.head
-	if currentNode == nil {
-		return Pair{}, errors.New("-->list is clear")
-	}
-	for currentNode != nil {
-		if currentNode.data.key == val {
-			if currentNode == doubly_connected.head {
-				doubly_connected.head = currentNode.next
-				if doubly_connected.head != nil {
-					doubly_connected.head.previous = nil
-				}
-			} else if currentNode == doubly_connected.tail {
-				doubly_connected.tail = currentNode.previous
-				if doubly_connected.tail != nil {
-					doubly_connected.tail.next = nil
-				}
-			} else {
-				currentNode.previous.next = currentNode.next
-				currentNode.next.previous = currentNode.previous
-			}
-			doubly_connected.lenght--
-			return currentNode.data, nil
-		}
-
-		currentNode = currentNode.next
-	}
-	return Pair{}, errors.New("--> key not founde")
 }
 
 // Stack
@@ -403,10 +264,10 @@ func Scan_Table_Queue(filepath string, line_number int) Queue {
 	return queue
 }
 
-func Scan_Table_Hash_Table(filepath string, line_number int) Hash_Table {
+func Scan_Table_Hash_Table(filepath string, line_number int) structs.Hash_Table {
 	line, err := Read_Line_Fromfile(filepath, line_number)
 	if err != nil {
-		return Hash_Table{}
+		return structs.Hash_Table{}
 	}
 	startIndex := strings.Index(line, "[") + 1
 	endIndex := strings.Index(line, "}")
@@ -417,13 +278,13 @@ func Scan_Table_Hash_Table(filepath string, line_number int) Hash_Table {
 	val = strings.ReplaceAll(val, "(", "")
 	arr := strings.Split(val, ",")
 	size_int, _ := strconv.Atoi(size)
-	hash_table := NewHashTable(size_int)
+	hash_table := structs.NewHashTable(size_int)
 	for i := 0; i < len(arr); i++ {
 		if arr[i] != "" {
 			key := strings.ReplaceAll(arr[i], " ", "")
 			i++
 			value := strings.ReplaceAll(arr[i], " ", "")
-			hash_table.hset(key, value)
+			hash_table.Hset(key, value)
 		}
 	}
 	return hash_table
@@ -493,14 +354,14 @@ func Print_Table_Queue(filepath string, line_number int, name_table string, queu
 	return nil
 }
 
-func Print_Table_Hash_Table(filepath string, line_number int, name_table string, ht Hash_Table) error {
+func Print_Table_Hash_Table(filepath string, line_number int, name_table string, ht structs.Hash_Table) error {
 	out := name_table
 	out += ": [" + strconv.Itoa(ht.Size) + ", {"
 	for index := 0; index < ht.Size; index++ {
-		currentNode := ht.Table[index].head
+		currentNode := ht.Table[index].Head
 		for currentNode != nil {
-			out += "(" + currentNode.data.key + ", " + currentNode.data.value + "), "
-			currentNode = currentNode.next
+			out += "(" + currentNode.Data.Key + ", " + currentNode.Data.Value + "), "
+			currentNode = currentNode.Next
 		}
 	}
 	if len(out) == len(name_table)+len(strconv.Itoa(ht.Size))+6 {
@@ -647,7 +508,7 @@ func Processing_Request(filepath string, commands [4]string) {
 					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
 					return
 				}
-				err := hash_table.hset(commands[2], commands[3])
+				err := hash_table.Hset(commands[2], commands[3])
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -660,7 +521,7 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2], "~", commands[3])
 				return
 			case "hdel":
-				value, err := hash_table.hdel(commands[2])
+				value, err := hash_table.Hdel(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -673,7 +534,7 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2], "~", value)
 				return
 			case "hget":
-				value, err := hash_table.hget(commands[2])
+				value, err := hash_table.Hget(commands[2])
 				if err != nil {
 					fmt.Println(err)
 					return
