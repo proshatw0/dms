@@ -43,6 +43,15 @@ func Processing_Request(filepath string, commands [4]string) {
 					return
 				}
 				fmt.Println("-->", commands[2], "~", commands[3])
+				return
+			case "aget":
+				data, err := array.Aget(index)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", data)
+				return
 			}
 		case "set":
 			set := Scan_Table_Set(filepath, number_line)
