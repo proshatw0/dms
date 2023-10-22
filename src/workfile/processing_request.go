@@ -3,6 +3,8 @@ package workfile
 import (
 	"fmt"
 	"strconv"
+
+	"dms/src/structs"
 )
 
 func Processing_Request(filepath string, commands [4]string) {
@@ -13,6 +15,163 @@ func Processing_Request(filepath string, commands [4]string) {
 	}
 	if number_line != 0 {
 		switch mod {
+		case "dl_list":
+			dl_list := Scan_Table_Dl_list(filepath, number_line)
+			if dl_list.Head != nil {
+				if dl_list.Head.Data == "error1456&789" {
+					fmt.Println("-->table not found", dl_list.Head)
+					return
+				}
+			}
+			switch commands[0] {
+			case "dlpush_end":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				dl_list.Dlpush_end(commands[2])
+				err := Print_Table_Dl_list(filepath, number_line, commands[1], dl_list)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2])
+				return
+			case "dlpush_begin":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				dl_list.Dlpush_begin(commands[2])
+				err := Print_Table_Dl_list(filepath, number_line, commands[1], dl_list)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2])
+				return
+			case "dldel_end":
+				err, value := dl_list.Dldel_end()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Dl_list(filepath, number_line, commands[1], dl_list)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", value)
+				return
+			case "dldel_begin":
+				err, value := dl_list.Dldel_begin()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Dl_list(filepath, number_line, commands[1], dl_list)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", value)
+				return
+			case "dldel":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				err := dl_list.Dldel(commands[2])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Dl_list(filepath, number_line, commands[1], dl_list)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2])
+				return
+			case "dlcout":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				err := dl_list.Dlcout(commands[2])
+				if err != nil {
+					fmt.Println("--> False")
+					return
+				}
+				fmt.Println("--> True")
+				return
+			case "dllen":
+				len := dl_list.Dllen()
+				fmt.Println("-->", len)
+				return
+			}
+		case "tree":
+			tree := Scan_Table_Tree(filepath, number_line)
+			if tree.Root == nil {
+				fmt.Println("-->table not found")
+				return
+			}
+			switch commands[0] {
+			case "tins":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				tree.Tins(commands[2])
+				err := Print_Table_Tree(filepath, number_line, commands[1], tree)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2])
+				return
+			case "tdel":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				err := tree.Tdel(commands[2])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Tree(filepath, number_line, commands[1], tree)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2])
+				return
+			case "tcon":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				err := tree.Tcon(commands[2])
+				if err != nil {
+					fmt.Println("--> False")
+					return
+				}
+				fmt.Println("--> True")
+			case "tmax":
+				fmt.Println("-->", structs.Tmax(tree.Root))
+				return
+			case "tmin":
+				fmt.Println("-->", structs.Tmin(tree.Root))
+				return
+			}
 		case "array":
 			index, err := strconv.Atoi(commands[2])
 			if err != nil {

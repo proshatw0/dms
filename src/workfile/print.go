@@ -2,6 +2,7 @@ package workfile
 
 import (
 	"strconv"
+	"strings"
 
 	"dms/src/structs"
 )
@@ -105,6 +106,57 @@ func Print_Table_Hash_Table(filepath string, line_number int, name_table string,
 		out += "}]"
 	} else {
 		out = out[0:len(out)-2] + "}]"
+	}
+	err := WriteLineFromFile(filepath, line_number, out)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Print_Table_Tree(filepath string, line_number int, name_table string, bst *structs.BinarySearchTree) error {
+	values := make([]string, 0)
+	bst.InOrderTraversal(bst.Root, &values, true)
+
+	// Используем strings.TrimSpace для удаления пробелов в начале и конце элементов
+	cleanedValues := make([]string, len(values))
+	for i, value := range values {
+		cleanedValues[i] = strings.TrimSpace(value)
+	}
+
+	out := name_table + ": ["
+	out = out + strings.TrimSpace(bst.Root.Value) + ", {"
+
+	if len(cleanedValues) > 0 {
+		out += strings.Join(cleanedValues, ", ")
+	}
+
+	out += "}]"
+	index := strings.Index(out, "{")
+	if out[index+1] == ',' {
+		out = out[:index+1] + out[index+3:]
+	}
+
+	err := WriteLineFromFile(filepath, line_number, out)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Print_Table_Dl_list(filepath string, line_number int, name_table string, dl_list structs.Doubly_Linked_List) error {
+	out := name_table
+	out += ": ["
+	currentNode := dl_list.Head
+	for currentNode != nil {
+			out += currentNode.Data + ", "
+		currentNode = currentNode.Next
+	}
+	if len(out) == len(name_table)+3 {
+		out = out + "]"
+	} else {
+		out = out[0:len(out)-2] + "]"
 	}
 	err := WriteLineFromFile(filepath, line_number, out)
 	if err != nil {

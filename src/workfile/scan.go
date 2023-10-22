@@ -1,6 +1,7 @@
 package workfile
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -100,4 +101,48 @@ func Scan_Table_Hash_Table(filepath string, line_number int) structs.Hash_Table 
 		}
 	}
 	return *hash_table
+}
+
+func Scan_Table_Tree(filepath string, line_number int) *structs.BinarySearchTree {
+	line, err := Read_Line_Fromfile(filepath, line_number)
+	if err != nil {
+		return structs.NewBinarySearchTree()
+	}
+	re := regexp.MustCompile(`\[([^\]]+)\]`)
+	match := re.FindStringSubmatch(line)
+	if len(match) < 2 {
+		return structs.NewBinarySearchTree()
+	}
+	val := match[1]
+	val = strings.ReplaceAll(val, " ", "")
+	val = strings.ReplaceAll(val, "{", "")
+	val = strings.ReplaceAll(val, "}", "")
+	arr := strings.Split(val, ",")
+	tree := structs.NewBinarySearchTree()
+	head := strings.TrimSpace(arr[0])
+	tree.Tins(head)
+	for i := 1; i < len(arr); i++ {
+		tree.Tins(strings.ReplaceAll(arr[i], " ", ""))
+	}
+	return tree
+}
+
+func Scan_Table_Dl_list(filepath string, line_number int) structs.Doubly_Linked_List {
+	line, err := Read_Line_Fromfile(filepath, line_number)
+	if err != nil {
+		return structs.Doubly_Linked_List{
+			Head: &structs.Node_Dl{Data: "error1456&789"},
+		}
+	}
+	startIndex := strings.Index(line, "[") + 1
+	endIndex := strings.Index(line, "]")
+	val := line[startIndex:endIndex]
+	arr := strings.Split(val, ",")
+	dl_list := structs.Doubly_Linked_List{}
+	for i := len(arr) - 1; i >= 0; i-- {
+		if arr[i] != ""{
+		dl_list.Dlpush_begin(strings.ReplaceAll(arr[i], " ", ""))
+		}
+	}
+	return dl_list
 }
