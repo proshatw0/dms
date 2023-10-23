@@ -173,12 +173,6 @@ func Processing_Request(filepath string, commands [4]string) {
 				return
 			}
 		case "array":
-			index, err := strconv.Atoi(commands[2])
-			if err != nil {
-				fmt.Println("-->invalid request")
-				fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
-				return
-			}
 			array := Scan_Table_Array(filepath, number_line)
 			if array.Lenght <= 0 {
 				fmt.Println("-->table not found")
@@ -186,7 +180,8 @@ func Processing_Request(filepath string, commands [4]string) {
 			}
 			switch commands[0] {
 			case "aset":
-				if commands[3] == "" {
+				index, err := strconv.Atoi(commands[2])
+				if err != nil || commands[3] == "" {
 					fmt.Println("-->invalid request")
 					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
 					return
@@ -204,12 +199,94 @@ func Processing_Request(filepath string, commands [4]string) {
 				fmt.Println("-->", commands[2], "~", commands[3])
 				return
 			case "aget":
+				index, err := strconv.Atoi(commands[2])
+				if err != nil {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
 				data, err := array.Aget(index)
 				if err != nil {
 					fmt.Println(err)
 					return
 				}
 				fmt.Println("-->", data)
+				return
+			case "aindex":
+				index, err := array.Aindex(commands[2])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", index)
+				return
+			case "adel":
+				index, err := strconv.Atoi(commands[2])
+				if err != nil {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				value, err := array.Adel(index)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Array(filepath, number_line, commands[1], array)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2], "~", value)
+				return
+			case "adel_value":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				value, err := array.Adel_value(commands[2])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Array(filepath, number_line, commands[1], array)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", value)
+				return
+			case "apush":
+				if commands[2] == "" {
+					fmt.Println("-->invalid request")
+					fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+					return
+				}
+				err := array.Apush(commands[2])
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Array(filepath, number_line, commands[1], array)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", commands[2])
+				return
+			case "apop":
+				value, err := array.Apop()
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				err = Print_Table_Array(filepath, number_line, commands[1], array)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println("-->", value)
 				return
 			}
 		case "set":

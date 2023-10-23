@@ -120,7 +120,7 @@ func Search_Table(filepath string, command string, name_table string) (string, i
 			return "tree", 0
 		}
 		return "tree", number_line
-	case "aset", "aget":
+	case "aset", "aget", "aindex", "adel", "adel_value", "apush", "apop":
 		line, err := Read_Line_Fromfile(filepath, 1)
 		if err != nil {
 			log.Fatal(err)
