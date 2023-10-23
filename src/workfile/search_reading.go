@@ -100,7 +100,27 @@ func Search_Number_Table(line string, name_table string) int {
 
 func Search_Table(filepath string, command string, name_table string) (string, int) {
 	switch command {
-	case "aset", "aget":
+	case "dlpush_end", "dlpush_begin", "dldel_end", "dldel_begin", "dldel", "dlcout", "dllen":
+		line, err := Read_Line_Fromfile(filepath, 6)
+		if err != nil {
+			log.Fatal(err)
+		}
+		number_line := Search_Number_Table(line, name_table)
+		if number_line == 0 {
+			return "tree", 0
+		}
+		return "dl_list", number_line
+	case "tins", "tdel", "tcon", "tmax", "tmin":
+		line, err := Read_Line_Fromfile(filepath, 7)
+		if err != nil {
+			log.Fatal(err)
+		}
+		number_line := Search_Number_Table(line, name_table)
+		if number_line == 0 {
+			return "tree", 0
+		}
+		return "tree", number_line
+	case "aset", "aget", "aindex", "adel", "adel_value", "apush", "apop":
 		line, err := Read_Line_Fromfile(filepath, 1)
 		if err != nil {
 			log.Fatal(err)
