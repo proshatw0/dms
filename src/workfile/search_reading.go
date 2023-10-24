@@ -3,8 +3,6 @@ package workfile
 import (
 	"bufio"
 	"errors"
-	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -14,7 +12,7 @@ import (
 func Read_Line_Fromfile(path string, line_num int) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		return "", errors.New("-->file not found")
 	}
 	defer file.Close()
 
@@ -28,10 +26,10 @@ func Read_Line_Fromfile(path string, line_num int) (string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		return "", errors.New("-->file not found")
 	}
 
-	return "", fmt.Errorf("-->line not found")
+	return "", errors.New("-->line not found")
 }
 
 func WriteLineFromFile(path string, lineNum int, data string) error {
@@ -98,79 +96,79 @@ func Search_Number_Table(line string, name_table string) int {
 	return value
 }
 
-func Search_Table(filepath string, command string, name_table string) (string, int) {
+func Search_Table(filepath string, command string, name_table string) (error, string, int) {
 	switch command {
 	case "dlpush_end", "dlpush_begin", "dldel_end", "dldel_begin", "dldel", "dlcout", "dllen":
 		line, err := Read_Line_Fromfile(filepath, 6)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "tree", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "dl_list", number_line
+		return nil, "dl_list", number_line
 	case "tins", "tdel", "tcon", "tmax", "tmin":
 		line, err := Read_Line_Fromfile(filepath, 7)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "tree", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "tree", number_line
+		return nil, "tree", number_line
 	case "aset", "aget", "aindex", "adel", "adel_value", "apush", "apop":
 		line, err := Read_Line_Fromfile(filepath, 1)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "array", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "array", number_line
+		return nil, "array", number_line
 	case "sadd", "srem", "sismember":
 		line, err := Read_Line_Fromfile(filepath, 2)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "set", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "set", number_line
+		return nil, "set", number_line
 	case "spush", "spop":
 		line, err := Read_Line_Fromfile(filepath, 3)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "stack", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "stack", number_line
+		return nil, "stack", number_line
 	case "qpush", "qpop":
 		line, err := Read_Line_Fromfile(filepath, 4)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "queue", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "queue", number_line
+		return nil, "queue", number_line
 	case "hset", "hdel", "hget":
 		line, err := Read_Line_Fromfile(filepath, 5)
 		if err != nil {
-			log.Fatal(err)
+			return errors.New("-->file not found"), "", -1
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return "hash_table", 0
+			return errors.New("-->file not found"), "", -1
 		}
-		return "hash_table", number_line
+		return nil, "hash_table", number_line
 	default:
-		return "", 0
+		return errors.New("-->command not found"), "", -1
 	}
 }
