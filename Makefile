@@ -1,6 +1,5 @@
-SRC = src
 FILES = main.go
-TARGET = bin/dms
+TARGET = bin/dms_server
 
 .PHONY: clean
 

@@ -1,28 +1,102 @@
 package main
 
 import (
-	"flag"
+	"bufio"
 	"fmt"
+	"net"
+	"strconv"
 	"strings"
+	"sync"
 
 	"dms/src/workfile"
 )
 
 func main() {
-	filepath := flag.String("file", "", "filepath")
-	command := flag.String("query", "", "command")
+	address := "172.26.216.63:6379"
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		fmt.Println("Error when starting the server:", err)
+		return
+	}
+	defer listener.Close()
 
-	flag.Parse()
-	if *command != "" && *filepath != "" && strings.ReplaceAll(*command, " ", "") != "" {
-		arr := strings.Fields(*command)
-		arr[0] = strings.ToLower(arr[0])
-		commands := [4]string{"", "", "", ""}
-		for i := 0; i < len(arr); i++ {
-			commands[i] = arr[i]
+	fmt.Println("The server is listening on:", address)
+
+	var wg sync.WaitGroup
+	for i := 0; i < 6; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for {
+				conn, err := listener.Accept()
+				if err != nil {
+					fmt.Println("Error accepting connection:", err)
+					continue
+				}
+				go handleConnection(conn)
+			}
+		}()
+	}
+	wg.Wait()
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	reader := bufio.NewReader(conn)
+	filepath, err := reader.ReadString('\n')
+	filepath = strings.ReplaceAll(filepath, "\n", "")
+	if err != nil {
+		fmt.Println("Error reading data:", err)
+		return
+	}
+
+	commands := [4]string{"", "", "", ""}
+	for i := 0; i < 4; i++ {
+		commands[i], err = reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error reading data:", err)
+			return
 		}
-		workfile.Processing_Request("../data/"+*filepath, commands)
-	} else {
-		fmt.Println("-->invalid request")
-		fmt.Println("Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>")
+		commands[i] = strings.ReplaceAll(commands[i], "\n", "")
+	}
+	err, value, integer := workfile.Processing_Request("../data/"+filepath, commands)
+
+	if err != nil {
+		response := fmt.Sprintln(err)
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("Error writing response:", err)
+			return
+		}
+	}
+
+	if integer != -1 && value != "" {
+		out := "--> " + strconv.Itoa(integer) + " ~ " + value
+		response := fmt.Sprintln(out)
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("Error writing response:", err)
+			return
+		}
+	}
+
+	if integer != -1 && value == "" {
+		out := "--> " + strconv.Itoa(integer)
+		response := fmt.Sprintln(out)
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("Error writing response:", err)
+			return
+		}
+	}
+	if value != "" && integer == -1 {
+		out := "--> " + value
+		response := fmt.Sprintln(out)
+		_, err = conn.Write([]byte(response))
+		if err != nil {
+			fmt.Println("Error writing response:", err)
+			return
+		}
 	}
 }

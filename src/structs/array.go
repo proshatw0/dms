@@ -71,7 +71,7 @@ func (array *Array) index_last_element() (int, error) {
 			return i, nil
 		}
 	}
-	return -1, errors.New("--array is clear")
+	return -1, errors.New("-->array is clear")
 }
 
 func (array *Array) Apop() (string, error) {
