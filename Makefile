@@ -1,5 +1,5 @@
 FILES = main.go
-TARGET = bin/dms_server
+TARGET = bin/dms_server.exe
 
 .PHONY: clean
 

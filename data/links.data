@@ -1,0 +1,4 @@
+web: [{links, 4}]
+
+
+links: [2, {(localhost/2, https://www.youtube.com/watch?v=B_D-rdYYvc8&list=RDMM5EXKCJ4lPAo&index=10), (localhost/1, https://www.youtube.com/watch?v=mRD0-GxqHVo), (localhost/3, https://www.google.com/search?q=%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4%D1%87%D0%B8%D0%BA&oq=gtht&gs_lcrp=EgZjaHJvbWUqDQgBEEUYARgKGDsYgAQyBggAEEUYOTINCAEQRRgBGAoYOxiABDILCAIQABgBGAoYgAQyBwgDEAAYgAQyCwgEEAAYARgKGIAEMgsIBRAAGAEYChiABDILCAYQABgBGAoYgAQyCwgHEAAYARgKGIAEMgsICBAAGAEYChiABDIJCAkQABgKGIAE0gEHNzc0ajBqN6gCALACAA&sourceid=chrome&ie=UTF-8)}]

@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	address := "172.26.216.63:6379"
+	address := "10.241.125.222:6379"
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		fmt.Println("Error when starting the server:", err)
@@ -21,6 +21,8 @@ func main() {
 	defer listener.Close()
 
 	fmt.Println("The server is listening on:", address)
+
+	var mutex sync.Mutex
 
 	var wg sync.WaitGroup
 	for i := 0; i < 6; i++ {
@@ -33,14 +35,14 @@ func main() {
 					fmt.Println("Error accepting connection:", err)
 					continue
 				}
-				go handleConnection(conn)
+				go handleConnection(conn, &mutex)
 			}
 		}()
 	}
 	wg.Wait()
 }
 
-func handleConnection(conn net.Conn) {
+func handleConnection(conn net.Conn, mutex *sync.Mutex) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
@@ -60,7 +62,11 @@ func handleConnection(conn net.Conn) {
 		}
 		commands[i] = strings.ReplaceAll(commands[i], "\n", "")
 	}
+	mutex.Lock()
+
 	err, value, integer := workfile.Processing_Request("../data/"+filepath, commands)
+
+	mutex.Unlock()
 
 	if err != nil {
 		response := fmt.Sprintln(err)

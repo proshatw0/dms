@@ -4,12 +4,13 @@ import (
 	"errors"
 	"strconv"
 
+	"dms/src/checkURL"
 	"dms/src/structs"
 )
 
 func Processing_Request(filepath string, commands [4]string) (error, string, int) {
 	err, mod, number_line := Search_Table(filepath, commands[0], commands[1])
-	if err != nil {
+	if err != nil || number_line == -1 {
 		return err, "", -1
 	}
 	if mod == "" {
@@ -359,6 +360,38 @@ func Processing_Request(filepath string, commands [4]string) (error, string, int
 				}
 				return nil, commands[2] + " ~ " + value, -1
 			}
+		case "link":
+			if commands[1] == "" {
+				return errors.New("-->Example request: ./<name of your program> --file <path to the data file> --query <operation table_name element>"), "", -1
+
+			}
+			links, len := Scan_Table_Links(filepath, number_line)
+			if links.Size <= 0 && len == -1 {
+				return errors.New("-->table not found"), "", -1
+			}
+			switch commands[0] {
+			case "post":
+				if !checkURL.CheckURL(commands[1]) {
+					return errors.New("-->original link is not available"), "", -1
+				}
+				base := "localhost/"
+				base += strconv.Itoa(len + 1)
+				err := links.Hset(base, commands[1])
+				if err != nil {
+					return err, "", -1
+				}
+				err = Print_Table_Hash_Table(filepath, number_line, "links", links)
+				if err != nil {
+					return err, "", -1
+				}
+				return nil, base, -1
+			case "get":
+				value, err := links.Hget(commands[1])
+				if err != nil {
+					return err, "", -1
+				}
+				return nil, value, -1
+			}
 		default:
 			return errors.New("-->table not found"), "", -1
 		}
@@ -366,4 +399,8 @@ func Processing_Request(filepath string, commands [4]string) (error, string, int
 		return errors.New("-->table not found"), "", -1
 	}
 	return errors.New("-->table not found"), "", -1
+}
+
+func CheckURL(s string) {
+	panic("unimplemented")
 }

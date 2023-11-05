@@ -87,6 +87,9 @@ func WriteLinesToFile(path string, lines []string) error {
 
 func Search_Number_Table(line string, name_table string) int {
 	startIndex := strings.Index(line, name_table) + len(name_table) + 2
+	if startIndex > len(line) {
+		return 0
+	}
 	endIndex := strings.Index(line[startIndex:], "}")
 	valueStr := line[startIndex : startIndex+endIndex]
 	value, err := strconv.Atoi(valueStr)
@@ -105,7 +108,7 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "dl_list", number_line
 	case "tins", "tdel", "tcon", "tmax", "tmin":
@@ -115,7 +118,7 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "tree", number_line
 	case "aset", "aget", "aindex", "adel", "adel_value", "apush", "apop":
@@ -125,7 +128,7 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "array", number_line
 	case "sadd", "srem", "sismember":
@@ -135,7 +138,7 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "set", number_line
 	case "spush", "spop":
@@ -145,7 +148,7 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "stack", number_line
 	case "qpush", "qpop":
@@ -155,7 +158,7 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "queue", number_line
 	case "hset", "hdel", "hget":
@@ -165,9 +168,19 @@ func Search_Table(filepath string, command string, name_table string) (error, st
 		}
 		number_line := Search_Number_Table(line, name_table)
 		if number_line == 0 {
-			return errors.New("-->file not found"), "", -1
+			return errors.New("-->table not found"), "", -1
 		}
 		return nil, "hash_table", number_line
+	case "post", "get":
+		line, err := Read_Line_Fromfile(filepath, 1)
+		if err != nil {
+			return errors.New("-->file not found"), "", -1
+		}
+		number_line := Search_Number_Table(line, "links")
+		if number_line == 0 {
+			return errors.New("-->table not found"), "", -1
+		}
+		return nil, "link", number_line
 	default:
 		return errors.New("-->command not found"), "", -1
 	}
